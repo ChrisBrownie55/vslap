@@ -28,18 +28,18 @@ export default {
   },
   computed: {
     target() {
-      return this.$store.state.target;
+      return this.$store.state.slapGame.target;
     },
     availableItems() {
-      return this.$store.state.availableItems;
+      return this.$store.state.slapGame.availableItems;
     },
     dead() {
-      return this.$store.state.target.health <= 0;
+      return this.$store.state.slapGame.target.health <= 0;
     }
   }
 };
 </script>
-<style>
+<style lang='scss'>
 .red {
   background-color: rgb(243, 62, 62);
 }
@@ -49,5 +49,22 @@ export default {
 .red,
 .green {
   color: white;
+}
+
+button {
+  border: none;
+  background: #8e42ec;
+  color: white;
+  font-size: 1rem;
+  padding: 0.5rem 1rem;
+  margin: 0.5rem;
+  border-radius: 0.1rem;
+  cursor: pointer;
+  position: relative;
+  padding-left: 1rem;
+  transition: box-shadow 0.2s;
+  &:active {
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
+  }
 }
 </style>
