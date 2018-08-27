@@ -1,9 +1,10 @@
 <template>
   <div class='vendr'>
     <section class='items'>
-      <article v-for='(item, index) in products' class='item' :key='index'>
+      <article v-for='(item, index) in products' class='item' :key='index' @click='buyItem(index)'>
         <img :src='item.img' />
         <h3>{{item.cost}}</h3>
+        <h6>{{item.stock}}</h6>
       </article>
     </section>
     <section class='money'>
@@ -16,6 +17,9 @@
       </p>
     </section>
     <button :class='{ show: balance }' class='give-change' @click='emptyBalance()'>Give change</button>
+    <section class='tray'>
+      <img v-for='(item, index) in tray' :key='index' :src='item.img' @click='takeFromTray(index)' />
+    </section>
   </div>
 </template>
 
@@ -27,6 +31,12 @@ export default {
     },
     emptyBalance() {
       this.$store.dispatch('emptyBalance');
+    },
+    buyItem(item) {
+      this.$store.dispatch('buyItem', item);
+    },
+    takeFromTray(index) {
+      this.$store.dispatch('removeFromTray', index);
     }
   },
   computed: {
@@ -38,6 +48,9 @@ export default {
     },
     balance() {
       return this.$store.state.vendr.balance;
+    },
+    tray() {
+      return this.$store.state.vendr.tray;
     }
   }
 };
@@ -61,10 +74,12 @@ export default {
   }
   &.placeholder {
     filter: saturate(25%);
+
     & > img {
       background-color: #6a0edb;
       filter: none;
     }
+
     & > h3 {
       width: 2rem;
       height: 2rem;
@@ -96,6 +111,15 @@ export default {
     &::before {
       content: '$';
     }
+  }
+
+  & > h6 {
+    position: absolute;
+    top: 0.5rem;
+    left: 0.5rem;
+    margin: 0;
+    color: white;
+    font-weight: 400;
   }
 }
 
@@ -150,7 +174,7 @@ button {
   }
 }
 
-.vend-output {
+.tray {
   width: 100%;
   display: flex;
   flex-direction: row;
@@ -165,9 +189,7 @@ button {
     border-radius: 0.2rem;
     cursor: pointer;
     transition: filter 0.2s;
-    &:not(:last-child) {
-      margin-right: 1rem;
-    }
+    margin: 0.5rem;
     &:hover {
       filter: brightness(50%);
     }

@@ -1,6 +1,7 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
 import Target from './models/Target';
+import Product from './models/Product';
 
 Vue.use(Vuex);
 
@@ -25,20 +26,23 @@ export default new Vuex.Store({
     },
     vendr: {
       products: [
-        {
+        new Product({
           img: 'https://picsum.photos/1024/800?image=1080',
-          cost: 2
-        },
-        {
+          cost: 2,
+          stock: 10
+        }),
+        new Product({
           img:
             'https://hips.hearstapps.com/ghk.h-cdn.co/assets/17/50/1513015699-red-green-grapes.jpg',
-          cost: 1.25
-        },
-        {
+          cost: 1.25,
+          stock: 10
+        }),
+        new Product({
           img:
             'https://globalassets.starbucks.com/assets/e2f42654ecf74c5b9da0f7d83855ad02.jpg',
-          cost: 0.5
-        }
+          cost: 0.5,
+          stock: 10
+        })
       ],
       acceptedCoins: [0.25, 0.1, 0.05],
       balance: 0,
@@ -56,11 +60,13 @@ export default new Vuex.Store({
     setBalance(state, value) {
       state.vendr.balance = parseFloat(value.toFixed(2));
     },
-    deliverItem(state, value) {
-      state.vendr.tray.push(value);
+    deliverItem(state, index) {
+      const item = state.vendr.products[index];
+      item.stock--;
+      state.vendr.tray.push(item);
     },
     removeFromTray(state, index) {
-      state.vendr.tray.splice(index);
+      state.vendr.tray.splice(index, 1);
     }
   },
   actions: {
@@ -92,18 +98,21 @@ export default new Vuex.Store({
     emptyBalance({ commit }) {
       commit('setBalance', 0);
     },
-    buyItem({ commit, state }, payload) {
-      if (!state.vendr.products.includes(payload)) {
+    buyItem({ dispatch, commit, state }, index) {
+      if (index < 0 || index >= state.vendr.products.length) {
         return;
       }
-      const newBalance = state.vendr.balance - payload.cost;
+      const item = state.vendr.products[index];
+      if (item.stock <= 0) {
+        return dispatch('modal', 'Out of stock!');
+      }
+      const newBalance = state.vendr.balance - item.cost;
       if (newBalance < 0) {
-        return false;
+        return dispatch('modal', 'Insufficient funds!');
       }
 
       commit('setBalance', newBalance);
-      commit('deliverItem', payload);
-      return true;
+      commit('deliverItem', index);
     },
     removeFromTray({ commit, state }, index) {
       if (index < 0 || index >= state.vendr.tray.length) {
@@ -111,6 +120,14 @@ export default new Vuex.Store({
       }
 
       commit('removeFromTray', index);
+    },
+
+    modal(_, text) {
+      const dialog = document.createElement('dialog');
+      dialog.textContent = text;
+      document.body.appendChild(dialog);
+      dialog.showModal();
+      setTimeout(() => document.body.removeChild(dialog), 1000);
     }
   }
 });
