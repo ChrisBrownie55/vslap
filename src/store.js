@@ -39,7 +39,10 @@ export default new Vuex.Store({
             'https://globalassets.starbucks.com/assets/e2f42654ecf74c5b9da0f7d83855ad02.jpg',
           cost: 0.5
         }
-      ]
+      ],
+      acceptedCoins: [0.25, 0.1, 0.05],
+      balance: 0,
+      tray: []
     }
   },
   mutations: {
@@ -49,8 +52,15 @@ export default new Vuex.Store({
     addItem(state, item) {
       state.slapGame.target.items.push(item);
     },
-    reset(state) {
-      state.slapGame.target.health = 100;
+
+    setBalance(state, value) {
+      state.vendr.balance = parseFloat(value.toFixed(2));
+    },
+    deliverItem(state, value) {
+      state.vendr.tray.push(value);
+    },
+    removeFromTray(state, index) {
+      state.vendr.tray.splice(index);
     }
   },
   actions: {
@@ -71,7 +81,36 @@ export default new Vuex.Store({
       commit('addItem', payload);
     },
     reset({ commit }) {
-      commit('reset');
+      commit('setHealth', 100);
+    },
+
+    addCoin({ commit, state }, payload) {
+      if (state.vendr.acceptedCoins.includes(payload)) {
+        commit('setBalance', state.vendr.balance + payload);
+      }
+    },
+    emptyBalance({ commit }) {
+      commit('setBalance', 0);
+    },
+    buyItem({ commit, state }, payload) {
+      if (!state.vendr.products.includes(payload)) {
+        return;
+      }
+      const newBalance = state.vendr.balance - payload.cost;
+      if (newBalance < 0) {
+        return false;
+      }
+
+      commit('setBalance', newBalance);
+      commit('deliverItem', payload);
+      return true;
+    },
+    removeFromTray({ commit, state }, index) {
+      if (index < 0 || index >= state.vendr.tray.length) {
+        return;
+      }
+
+      commit('removeFromTray', index);
     }
   }
 });

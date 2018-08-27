@@ -6,14 +6,38 @@
         <h3>{{item.cost}}</h3>
       </article>
     </section>
+    <section class='money'>
+      <button v-for='(coin, index) in coins' @click='addCoin(coin)' :key='index'>{{coin*100}}</button>
+    </section>
+    <section class='total'>
+      <p>
+        Change:
+        <span class='change'>{{balance}}</span>
+      </p>
+    </section>
+    <button :class='{ show: balance }' class='give-change' @click='emptyBalance()'>Give change</button>
   </div>
 </template>
 
 <script>
 export default {
+  methods: {
+    addCoin(coin) {
+      this.$store.dispatch('addCoin', coin);
+    },
+    emptyBalance() {
+      this.$store.dispatch('emptyBalance');
+    }
+  },
   computed: {
     products() {
       return this.$store.state.vendr.products;
+    },
+    coins() {
+      return this.$store.state.vendr.acceptedCoins;
+    },
+    balance() {
+      return this.$store.state.vendr.balance;
     }
   }
 };
@@ -81,8 +105,18 @@ export default {
   flex-wrap: wrap;
   width: 100%;
   justify-content: center;
+
   & > button:not(:last-child) {
     margin-right: 0.5rem;
+  }
+  & > button::before {
+    content: '¢';
+    font-weight: 600;
+    font-family: Roboto, -apple-system, BlinkMacSystemFont, 'Segoe UI', Oxygen,
+      Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    position: absolute;
+    top: 50%;
+    transform: translate(-125%, -60%);
   }
 }
 
@@ -101,16 +135,6 @@ button {
   &:active {
     box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
   }
-}
-
-.money-button::before {
-  content: '¢';
-  font-weight: 600;
-  font-family: Roboto, -apple-system, BlinkMacSystemFont, 'Segoe UI', Oxygen,
-    Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-  position: absolute;
-  top: 50%;
-  transform: translate(-125%, -55%);
 }
 
 .total {
@@ -154,7 +178,6 @@ button {
   width: 7rem;
   height: 2.25rem;
   padding: 0;
-  margin-left: calc(50% - 3.5rem);
   margin-top: 1rem;
   font-size: 0.95rem;
 }
